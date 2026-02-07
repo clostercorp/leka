@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Consumption Survey</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 700px;
+            width: 100%;
+            min-height: 500px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 4px;
+            background: #e0e0e0;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #667eea;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            font-size: 14px;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .page {
+            display: none;
+            padding: 60px 50px 40px;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 {
+            font-size: 32px;
+            color: #1a1a1a;
+            margin-bottom: 16px;
+            line-height: 1.3;
+        }
+
+        h2 {
+            font-size: 24px;
+            color: #1a1a1a;
+            margin-bottom: 24px;
+            line-height: 1.4;
+        }
+
+        p {
+            font-size: 16px;
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 24px;
+        }
+
+        .question-number {
+            font-size: 14px;
+            color: #667eea;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .options {
+            margin: 30px 0;
+        }
+
+        .option {
+            background: #f8f9fa;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 16px 20px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .option:hover {
+            border-color: #667eea;
+            background: #f0f2ff;
+        }
+
+        .option.selected {
+            border-color: #667eea;
+            background: #f0f2ff;
+        }
+
+        .option input[type="radio"],
+        .option input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        textarea {
+            width: 100%;
+            padding: 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            font-family: inherit;
+            transition: border-color 0.2s;
+            margin-top: 12px;
+        }
+
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .rating-scale {
+            display: flex;
+            gap: 8px;
+            margin: 24px 0;
+            flex-wrap: wrap;
+        }
+
+        .rating-option {
+            width: 50px;
+            height: 50px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 600;
+            color: #666;
+        }
+
+        .rating-option:hover {
+            border-color: #667eea;
+            background: #f0f2ff;
+        }
+
+        .rating-option.selected {
+            background: #667eea;
+            border-color: #667eea;
+            color: white;
+        }
+
+        .rating-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #999;
+            margin-top: 8px;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 40px;
+        }
+
+        button {
+            padding: 14px 32px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+            flex: 1;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #666;
+            padding: 14px 24px;
+        }
+
+        .btn-secondary:hover {
+            background: #e9ecef;
+        }
+
+        .thank-you {
+            text-align: center;
+            padding: 80px 20px;
+        }
+
+        .thank-you h1 {
+            font-size: 36px;
+            margin-bottom: 20px;
+        }
+
+        .checkmark {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: #4caf50;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 30px;
+            font-size: 48px;
+            color: white;
+        }
+
+        @media (max-width: 600px) {
+            .page {
+                padding: 40px 30px 30px;
+            }
+            
+            h1 {
+                font-size: 26px;
+            }
+            
+            h2 {
+                font-size: 20px;
+            }
+
+            .rating-option {
+                width: 45px;
+                height: 45px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <div class="progress-text" id="progressText">0%</div>
+
+        <!-- Page 0: Onboarding -->
+        <div class="page active" data-page="0">
+            <h1>📹 Help Us Understand Your Video Habits</h1>
+            <p>This survey takes about 5 minutes. Your insights will directly shape features that save you time and reduce the overwhelm of keeping up with all that content.</p>
+            
+            <p><strong>We're building Leka</strong> — a tool to extract the value from long videos and turn it into useful knowledge in minutes instead of hours.</p>
+            
+            <p>Leka watches the video for you and removes the boring parts. A 60-minute video becomes a 5–10-minute summary you can read or listen to.</p>
+            
+            <p>Want to know more? Ask Leka questions in the Chat to get answers from the video or follow timestamps to jump to the exact moment.</p>
+            
+            <p>You can also turn any video into ready content: LinkedIn posts or short video scripts.</p>
+            
+            <p><strong>Spend less time watching. Get the value faster.</strong></p>
+            
+            <p style="background: #fff3cd; padding: 12px; border-radius: 6px; border-left: 4px solid #ffc107; margin-top: 20px;"><strong>Important:</strong> When answering, please think only about YouTube and educational videos — not Instagram or TikTok.</p>
+            
+            <div class="buttons">
+                <button class="btn-primary" onclick="nextPage()">Start Survey →</button>
+            </div>
+        </div>
+
+        <!-- Page 1: Name -->
+        <div class="page" data-page="1">
+            <div class="question-number">Question 1 of 18</div>
+            <h2>What's your name?</h2>
+            <input type="text" id="q1" placeholder="Enter your name">
+            <div class="buttons">
+                <button class="btn-secondary" onclick="prevPage()">← Back</button>
+                <button class="btn-primary" id="btn1" onclick="nextPage()" disabled>Next →</button>
+            </div>
+        </div>
+
+        <!-- Page 2: Age -->
+        <div class="page" data-page="2">
+            <div class="question-number">Question 2 of 18</div>
+            <h2>What's your age range?</h2>
+            <div class="options" id="q2">
+                <div class="option" onclick="selectOption(this, 'q2')">
+                    <input type="radio" name="age"> <span><25</span>
+                </div>
+                <div class="option" onclick="selectOption(this, 'q2')">
+                    <input type="radio" name="age"> <span>25–30</span>
+                </div>
+                <div class="option" onclick="selectOption(this, 'q2')">
+                    <input type="radio" name="age"> <span>30–35</span>
+                </div>
+                <div class="option" onclick="selectOption(this, 'q2')">
+                    <input type="radio" name="age"> <span>35–40</span>
+                </div>
+                <div class="option" onclick="selectOption(this, 'q2')">
+                    <input type="radio" name="age"> <span>40–45</span>
+                </div>
+                <div class="option" onclick="selectOption(this, 'q2')">
+                    <input type="radio" name="age"> <span>45–50</span>
+                </div>
+                <div class="option" onclick="selectOption(this, 'q2')">
+                    <input type="radio" name="age"> <span>50–55</span>
+                </div>
+                <div class="option" onclick="selectOption(this, 'q2')">
+                    <input type="radio" name="age"> <span>55–60</span>
+                </div>
+                <div class="option" onclick="selectOption(this, 'q2')">
+                    <input type="radio" name="age"> <span>60+</span>
+                </div>
+            </div>
+            <div class="buttons">
+                <button class="btn-secondary" onclick="prevPage()">← Back</button>
+                <button class="btn-primary" id="btn2" onclick="nextPage()" disabled>Next →</button>
+            </div>
+        </div>
+
+        <!-- Page 3: Videos per month -->
+        <div class="page" data-page="3">
+            <div class="question-number">Question 3 of 18</div>
+            <h2>How many videos longer than 10 minutes do you watch per month?</h2>
+            <div class="options" id="q3">
+                <div class="option" onclick="selectOption(this, 'q3')">
+                    <input type="radio" name="videos-month"> <span>0–10</span>
+                </div>
+                <div class="option" onclick="selectOption(this, 'q3')">
+                    <input type="radio" name="videos-month"> <span>10–20</span>
+                </div>
+                <div class="option" onclick="selectOption(this, 'q3')">
+                    <input type="radio" name="videos-month"> <span>20–30</span>
+                </div>
+                <div class="option" onclick="selectOption(this, 'q3')">
+                    <input type="radio" name="videos-month"> <span>30–50</span>
+                </div>
+                <div class="option" onclick="selectOption(this, 'q3')">
+                    <input type="radio" name="videos-month"> <span>50+</span>
+                </div>
+            </div>
+            <div class="buttons">
+                <button class="btn-secondary" onclick="prevPage()">← Back</button>
+                <button class="btn-primary" id="btn3" onclick="nextPage()" disabled>Next →</button>
+            </div>
+        </div>
+
+        <!-- Page 4: Hours on YouTube -->
+        <div class="page" data-page="4">
+            <div class="question-number">Question 4 of 18</div>
+            <h2>How many hours per month do you spend watching YouTube videos?</h2>
+            <input type="number" id="q4" placeholder="Enter hours (e.g., 10)">
+            <div class="buttons">
+                <button class="btn-secondary" onclick="prevPage()">← Back</button>
+                <button class="btn-primary" id="btn4" onclick="nextPage()" disabled>Next →</button>
+            </div>
+        </div>
+
+        <!-- Page 5: Hours on other platforms -->
+        <div class="page" data-page="5">
+            <div class="question-number">Question 5 of 18</div>
+            <h2>How many hours per month on other platforms (courses, etc.)?</h2>
+            <input type="number" id="q5" placeholder="Enter hours (e.g., 5)">
+            <div class="buttons">
+                <button class="btn-secondary" onclick="prevPage()">← Back</button>
+                <button class="btn-primary" onclick="nextPage()">Next →</button>
+            </div>
+        </div>
+
+        <!-- Page 6: Average video length -->
+        <div class="page" data-page="6">
+            <div class="question-number">Question 6 of 18</div>
+            <h2>What's the average length of videos you watch?</h2>
+            <div class="options" id="q6">
+                <div class="option" onclick="selectOption(this, 'q6')">
+                    <input type="radio" name="avg-length"> <span>10–20 minutes</span>
+                </div>
+                <div class="option" onclick="selectOption(this, 'q6')">
+                    <input type="radio" name="avg-length"> <span>20–40 minutes</span>
+                </div>
+                <div class="option" onclick="selectOption(this, 'q6')">
+                    <input type="radio" name="avg-length"> <span>40–60 minutes</span>
+                </div>
+                <div class="option" onclick="selectOption(this, 'q6')">
+                    <input type="radio" name="avg-length"> <span>60+ minutes</span>
+                </div>
+                <div class="option" onclick="selectOption(this, 'q6')">
+                    <input type="radio" name="avg-length"> <span>Hard to say</span>
+                </div>
+            </div>
+            <div class="buttons">
+                <button class="btn-secondary" onclick="prevPage()">← Back</button>
+                <button class="btn-primary" id="btn6" onclick="nextPage()" disabled>Next →</button>
+            </div>
+        </div>
+
+        <!-- Page 7: Save time question -->
+        <div class="page" data-page="7">
+            <div class="question-number">Question 7 of 20</div>
+            <h2>Do you want to save time and see only the useful parts of videos?</h2>
+            <div class="options" id="q7">
+                <div class="option" onclick="selectOption(this, 'q7')">
+                    <input type="radio" name="save-time"> <span>Yes</span>
+                </div>
+                <div class="option" onclick="selectOption(this, 'q7')">
+                    <input type="radio" name="save-time"> <span>No</span>
+                </div>
+            </div>
+            <div class="buttons">
+                <button class="btn-secondary" onclick="prevPage()">← Back</button>
+                <button class="btn-primary" id="btn7" onclick="nextPage()" disabled>Next →</button>
+            </div>
+        </div>
+
+        <!-- Page 8: Videos saved for later -->
+        <div class="page" data-page="8">
+            <div class="question-number">Question 8 of 21</div>
+            <h2>How many videos per month do you usually save to watch later (YouTube Watch Later or notes)?</h2>
+            <div class="options" id="q8">
+                <div class="option" onclick="selectOption(this, 'q8')">
+                    <input type="radio" name="saved"> <span>0–10</span>
+                </div>
+                <div class="option" onclick="selectOption(this, 'q8')">
+                    <input type="radio" name="saved"> <span>10–30</span>
+                </div>
+                <div class="option" onclick="selectOption(this, 'q8')">
+                    <input type="radio" name="saved"> <span>30–50</span>
+                </div>
+                <div class="option" onclick="selectOption(this, 'q8')">
+                    <input type="radio" name="saved"> <span>50–100</span>
+                </div>
+                <div class="option" onclick="selectOption(this, 'q8')">
+                    <input type="radio" name="saved"> <span>100+</span>
+                </div>
+            </div>
+            <div class="buttons">
+                <button class="btn-secondary" onclick="prevPage()">← Back</button>
+                <button class="btn-primary" id="btn8" onclick="nextPage()" disabled>Next →</button>
+            </div>
+        </div>
+
+        <!-- Page 9: What happens to saved videos -->
+        <div class="page" data-page="9">
+            <div class="question-number">Question 9 of 21</div>
+            <h2>What usually happens to videos you save for later?</h2>
+            <div class="options" id="q9">
+                <div class="option" onclick="selectOption(this, 'q9')">
+                    <input type="radio" name="happens"> <span>Watch completely</span>
+                </div>
+                <div class="option" onclick="selectOption(this, 'q9')">
+                    <input type="radio" name="happens"> <span>Watch partially</span>
+                </div>
+                <div class="option" onclick="selectOption(this, 'q9')">
+                    <input type="radio" name="happens"> <span>Skim through</span>
+                </div>
+                <div class="option" onclick="selectOption(this, 'q9')">
+                    <input type="radio" name="happens"> <span>Never return to them</span>
+                </div>
+                <div class="option" onclick="selectOption(this, 'q9')">
+                    <input type="radio" name="happens"> <span>Hard to say</span>
+                </div>
+            </div>
+            <div class="buttons">
+                <button class="btn-secondary" onclick="prevPage()">← Back</button>
+                <button class="btn-primary" id="btn9" onclick="nextPage()" disabled>Next →</button>
+            </div>
+        </div>
+
+        <!-- Page 10: Frustration level -->
+        <div class="page" data-page="10">
+            <div class="question-number">Question 10 of 21</div>
+            <h2>How frustrated are you at not keeping up with content?</h2>
+            <p style="color: #999; font-size: 14px;">1 = Not frustrated at all, 10 = Extremely frustrated</p>
+            <div class="rating-scale" id="q10">
+                <div class="rating-option" onclick="selectRating(this, 'q10', 1)">1</div>
+                <div class="rating-option" onclick="selectRating(this, 'q10', 2)">2</div>
+                <div class="rating-option" onclick="selectRating(this, 'q10', 3)">3</div>
+                <div class="rating-option" onclick="selectRating(this, 'q10', 4)">4</div>
+                <div class="rating-option" onclick="selectRating(this, 'q10', 5)">5</div>
+                <div class="rating-option" onclick="selectRating(this, 'q10', 6)">6</div>
+                <div class="rating-option" onclick="selectRating(this, 'q10', 7)">7</div>
+                <div class="rating-option" onclick="selectRating(this, 'q10', 8)">8</div>
+                <div class="rating-option" onclick="selectRating(this, 'q10', 9)">9</div>
+                <div class="rating-option" onclick="selectRating(this, 'q10', 10)">10</div>
+            </div>
+            <div class="rating-labels">
+                <span>Not frustrated</span>
+                <span>Extremely frustrated</span>
+            </div>
+            <div class="buttons">
+                <button class="btn-secondary" onclick="prevPage()">← Back</button>
+                <button class="btn-primary" id="btn10" onclick="nextPage()" disabled>Next →</button>
+            </div>
+        </div>
+
+        <!-- Page 11: Tool usefulness -->
+        <div class="page" data-page="11">
+            <div class="question-number">Question 11 of 21</div>
+            <h2>How useful would you find a tool that watches videos for you and shows only the valuable parts?</h2>
+            <p style="color: #999; font-size: 14px;">1 = Not useful at all, 10 = Extremely useful</p>
+            <div class="rating-scale" id="q11">
+                <div class="rating-option" onclick="selectRating(this, 'q11', 1)">1</div>
+                <div class="rating-option" onclick="selectRating(this, 'q11', 2)">2</div>
+                <div class="rating-option" onclick="selectRating(this, 'q11', 3)">3</div>
+                <div class="rating-option" onclick="selectRating(this, 'q11', 4)">4</div>
+                <div class="rating-option" onclick="selectRating(this, 'q11', 5)">5</div>
+                <div class="rating-option" onclick="selectRating(this, 'q11', 6)">6</div>
+                <div class="rating-option" onclick="selectRating(this, 'q11', 7)">7</div>
+                <div class="rating-option" onclick="selectRating(this, 'q11', 8)">8</div>
+                <div class="rating-option" onclick="selectRating(this, 'q11', 9)">9</div>
+                <div class="rating-option" onclick="selectRating(this, 'q11', 10)">10</div>
+            </div>
+            <div class="rating-labels">
+                <span>Not useful</span>
+                <span>Extremely useful</span>
+            </div>
+            <div class="buttons">
+                <button class="btn-secondary" onclick="prevPage()">← Back</button>
+                <button class="btn-primary" id="btn11" onclick="nextPage()" disabled>Next →</button>
+            </div>
+        </div>
+
+        <!-- Page 12: Other solutions -->
+        <div class="page" data-page="12">
+            <div class="question-number">Question 12 of 21</div>
+            <h2>Do you currently use other solutions to solve this problem?</h2>
+            <div class="options" id="q12">
+                <div class="option" onclick="selectOption(this, 'q12')">
+                    <input type="radio" name="other-solutions"> <span>Yes</span>
+                </div>
+                <div class="option" onclick="selectOption(this, 'q12')">
+                    <input type="radio" name="other-solutions"> <span>No</span>
+                </div>
+            </div>
+            <div class="buttons">
+                <button class="btn-secondary" onclick="prevPage()">← Back</button>
+                <button class="btn-primary" id="btn12" onclick="nextPage()" disabled>Next →</button>
+            </div>
+        </div>
+
+        <!-- Page 13: Name other solutions -->
+        <div class="page" data-page="13">
+            <div class="question-number">Question 13 of 21</div>
+            <h2>If yes, please name them:</h2>
+            <input type="text" id="q13" placeholder="e.g., YouTube chapters, Summarize.tech...">
+            <div class="buttons">
+                <button class="btn-secondary" onclick="prevPage()">← Back</button>
+                <button class="btn-primary" onclick="nextPage()">Next →</button>
+            </div>
+        </div>
+
+        <!-- Page 14: Liked features -->
+        <div class="page" data-page="14">
+            <div class="question-number">Question 14 of 21</div>
+            <h2>Which features of other platforms do you like the most?</h2>
+            <textarea id="q14" placeholder="Share what works well for you..."></textarea>
+            <div class="buttons">
+                <button class="btn-secondary" onclick="prevPage()">← Back</button>
+                <button class="btn-primary" onclick="nextPage()">Next →</button>
+            </div>
+        </div>
+
+        <!-- Page 15: Missing features -->
+        <div class="page" data-page="15">
+            <div class="question-number">Question 15 of 21</div>
+            <h2>Which features or capabilities do you feel are missing in such apps, or in general in your life?</h2>
+            <textarea id="q15" placeholder="What would make your life easier?"></textarea>
+            <div class="buttons">
+                <button class="btn-secondary" onclick="prevPage()">← Back</button>
+                <button class="btn-primary" onclick="nextPage()">Next →</button>
+            </div>
+        </div>
+
+        <!-- Page 16: Other ways to watch faster -->
+        <div class="page" data-page="16">
+            <div class="question-number">Question 16 of 21</div>
+            <h2>Do you use any other ways to watch videos faster?</h2>
+            <textarea id="q16" placeholder="e.g., 2x speed, reading comments, skipping around..."></textarea>
+            <div class="buttons">
+                <button class="btn-secondary" onclick="prevPage()">← Back</button>
+                <button class="btn-primary" onclick="nextPage()">Next →</button>
+            </div>
+        </div>
+
+        <!-- Page 17: Pricing expectations -->
+        <div class="page" data-page="17">
+            <div class="question-number">Question 17 of 21</div>
+            <h2>How much do you think such an app should cost per month?</h2>
+            <div class="options" id="q17">
+                <div class="option" onclick="selectOption(this, 'q17')">
+                    <input type="radio" name="pricing"> <span>$0–5</span>
+                </div>
+                <div class="option" onclick="selectOption(this, 'q17')">
+                    <input type="radio" name="pricing"> <span>$5–10</span>
+                </div>
+                <div class="option" onclick="selectOption(this, 'q17')">
+                    <input type="radio" name="pricing"> <span>$10–15</span>
+                </div>
+                <div class="option" onclick="selectOption(this, 'q17')">
+                    <input type="radio" name="pricing"> <span>$15–20</span>
+                </div>
+                <div class="option" onclick="selectOption(this, 'q17')">
+                    <input type="radio" name="pricing"> <span>$25–30</span>
+                </div>
+                <div class="option" onclick="selectOption(this, 'q17')">
+                    <input type="radio" name="pricing"> <span>$30+</span>
+                </div>
+            </div>
+            <div class="buttons">
+                <button class="btn-secondary" onclick="prevPage()">← Back</button>
+                <button class="btn-primary" id="btn17" onclick="nextPage()" disabled>Next →</button>
+            </div>
+        </div>
+
+        <!-- Page 18: Willingness to pay -->
+        <div class="page" data-page="18">
+            <div class="question-number">Question 18 of 21</div>
+            <h2>Would you be willing to pay now for 1-year access to this service? If yes, how much?</h2>
+            <input type="text" id="q18" placeholder="e.g., $50, or 'No'">
+            <div class="buttons">
+                <button class="btn-secondary" onclick="prevPage()">← Back</button>
+                <button class="btn-primary" onclick="nextPage()">Next →</button>
+            </div>
+        </div>
+
+        <!-- Page 19: Feelings about fluff -->
+        <div class="page" data-page="19">
+            <div class="question-number">Question 19 of 20</div>
+            <h2>How do you feel when watching long videos with lots of "fluff"?</h2>
+            <p style="color: #999; font-size: 14px;">Select all that apply</p>
+            <div class="options" id="q19">
+                <div class="option" onclick="toggleMultiple(this)">
+                    <input type="checkbox"> <span>Angry</span>
+                </div>
+                <div class="option" onclick="toggleMultiple(this)">
+                    <input type="checkbox"> <span>Wasting time</span>
+                </div>
+                <div class="option" onclick="toggleMultiple(this)">
+                    <input type="checkbox"> <span>Tired</span>
+                </div>
+                <div class="option" onclick="toggleMultiple(this)">
+                    <input type="checkbox"> <span>Indifferent</span>
+                </div>
+                <div class="option" onclick="toggleMultiple(this)">
+                    <input type="checkbox"> <span>Close the video</span>
+                </div>
+            </div>
+            <input type="text" id="q19-other" placeholder="Other (please specify)">
+            <div class="buttons">
+                <button class="btn-secondary" onclick="prevPage()">← Back</button>
+                <button class="btn-primary" onclick="nextPage()">Next →</button>
+            </div>
+        </div>
+
+        <!-- Page 20: Purpose of watching -->
+        <div class="page" data-page="20">
+            <div class="question-number">Question 20 of 21</div>
+            <h2>What's the usual purpose of watching long videos?</h2>
+            <p style="color: #999; font-size: 14px;">Select all that apply</p>
+            <div class="options" id="q20">
+                <div class="option" onclick="toggleMultiple(this)">
+                    <input type="checkbox"> <span>Learning / personal development</span>
+                </div>
+                <div class="option" onclick="toggleMultiple(this)">
+                    <input type="checkbox"> <span>Work / professional tasks</span>
+                </div>
+                <div class="option" onclick="toggleMultiple(this)">
+                    <input type="checkbox"> <span>Creating own content</span>
+                </div>
+                <div class="option" onclick="toggleMultiple(this)">
+                    <input type="checkbox"> <span>Staying "in the loop" (trends, news)</span>
+                </div>
+                <div class="option" onclick="toggleMultiple(this)">
+                    <input type="checkbox"> <span>Entertainment</span>
+                </div>
+            </div>
+            <input type="text" id="q20-other" placeholder="Other (please specify)">
+            <div class="buttons">
+                <button class="btn-secondary" onclick="prevPage()">← Back</button>
+                <button class="btn-primary" onclick="nextPage()">Next →</button>
+            </div>
+        </div>
+
+        <!-- Page 21: Email collection -->
+        <div class="page" data-page="21">
+            <div class="question-number">Last question!</div>
+            <h2>Enter your email if you would like to be among the first to try it.</h2>
+            <input type="email" id="q21" placeholder="your.email@example.com">
+            <div class="buttons">
+                <button class="btn-secondary" onclick="prevPage()">← Back</button>
+                <button class="btn-primary" onclick="submitSurvey()">Submit Survey →</button>
+            </div>
+        </div>
+
+        <!-- Thank You Page -->
+        <div class="page" data-page="22">
+            <div class="thank-you">
+                <div class="checkmark">✓</div>
+                <h1>Thank You!</h1>
+                <p>Your feedback is incredibly valuable and will help us create Leka — a tool that truly makes a difference in how you consume and manage video content.</p>
+                <p style="margin-top: 30px; color: #667eea; font-weight: 600;">We'll keep you posted on our progress!</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentPage = 0;
+        const totalPages = 22; // 0-21 (0 is onboarding, 22 is thank you)
+        
+        // Object to store all survey responses
+        const responses = {
+            q1: '', q2: '', q3: '', q4: '', q5: '', q6: '', q7: '', q8: '', q9: '', q10: '',
+            q11: '', q12: '', q13: '', q14: '', q15: '', q16: '', q17: '', q18: '', q19: '', q20: '', q21: ''
+        };
+        
+        // *** REPLACE THIS URL WITH YOUR DEPLOYED WEB APP URL ***
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxjoAdLyqWQGdgNaz41mWiHe_xpYGoBvTlW03O7bWoszIY3ge8n1lvlHrN8fQihlAUr0w/exec';
+
+        function updateProgress() {
+            const progress = (currentPage / totalPages) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+            document.getElementById('progressText').textContent = Math.round(progress) + '%';
+        }
+
+        function showPage(pageNum) {
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            document.querySelector(`[data-page="${pageNum}"]`).classList.add('active');
+            currentPage = pageNum;
+            updateProgress();
+            window.scrollTo(0, 0);
+        }
+
+        function nextPage() {
+            if (currentPage < totalPages) {
+                showPage(currentPage + 1);
+            }
+        }
+
+        function prevPage() {
+            if (currentPage > 0) {
+                showPage(currentPage - 1);
+            }
+        }
+
+        function selectOption(element, questionId) {
+            const parent = element.parentElement;
+            parent.querySelectorAll('.option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            element.classList.add('selected');
+            element.querySelector('input').checked = true;
+            
+            // Save the response
+            const selectedText = element.querySelector('span').textContent;
+            responses[questionId] = selectedText;
+            
+            // Enable next button
+            const pageNum = element.closest('.page').dataset.page;
+            const btn = document.getElementById('btn' + pageNum);
+            if (btn) btn.disabled = false;
+        }
+
+        function selectRating(element, questionId, value) {
+            const parent = element.parentElement;
+            parent.querySelectorAll('.rating-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            element.classList.add('selected');
+            
+            // Save the response
+            responses[questionId] = value.toString();
+            
+            // Enable next button
+            const pageNum = element.closest('.page').dataset.page;
+            const btn = document.getElementById('btn' + pageNum);
+            if (btn) btn.disabled = false;
+        }
+
+        function toggleMultiple(element) {
+            element.classList.toggle('selected');
+            const checkbox = element.querySelector('input[type="checkbox"]');
+            checkbox.checked = !checkbox.checked;
+            
+            // Save all checked options for this question
+            const pageNum = element.closest('.page').dataset.page;
+            const questionId = 'q' + pageNum;
+            const allOptions = element.closest('.options').querySelectorAll('.option.selected span');
+            const selectedValues = Array.from(allOptions).map(opt => opt.textContent);
+            
+            // Get the "Other" field if it exists
+            const otherField = document.getElementById(questionId + '-other');
+            if (otherField && otherField.value.trim()) {
+                selectedValues.push('Other: ' + otherField.value);
+            }
+            
+            responses[questionId] = selectedValues.join('; ');
+        }
+
+        function submitSurvey() {
+            // Collect any remaining "Other" field data
+            const q19Other = document.getElementById('q19-other');
+            if (q19Other && q19Other.value.trim()) {
+                if (responses.q19) {
+                    responses.q19 += '; Other: ' + q19Other.value;
+                } else {
+                    responses.q19 = 'Other: ' + q19Other.value;
+                }
+            }
+            
+            const q20Other = document.getElementById('q20-other');
+            if (q20Other && q20Other.value.trim()) {
+                if (responses.q20) {
+                    responses.q20 += '; Other: ' + q20Other.value;
+                } else {
+                    responses.q20 = 'Other: ' + q20Other.value;
+                }
+            }
+            
+            // Show thank you page immediately
+            showPage(22);
+            
+            // Send data to Google Sheets
+            fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(responses)
+            }).then(() => {
+                console.log('Survey response submitted successfully');
+            }).catch(error => {
+                console.error('Error submitting survey:', error);
+                // Still show thank you page even if submission fails
+            });
+        }
+
+        // Add input listeners for text fields
+        document.getElementById('q1').addEventListener('input', function() {
+            responses.q1 = this.value;
+            document.getElementById('btn1').disabled = this.value.trim() === '';
+        });
+
+        document.getElementById('q4').addEventListener('input', function() {
+            responses.q4 = this.value;
+            document.getElementById('btn4').disabled = this.value.trim() === '';
+        });
+        
+        document.getElementById('q5').addEventListener('input', function() {
+            responses.q5 = this.value;
+        });
+        
+        document.getElementById('q13').addEventListener('input', function() {
+            responses.q13 = this.value;
+        });
+        
+        document.getElementById('q14').addEventListener('input', function() {
+            responses.q14 = this.value;
+        });
+        
+        document.getElementById('q15').addEventListener('input', function() {
+            responses.q15 = this.value;
+        });
+        
+        document.getElementById('q16').addEventListener('input', function() {
+            responses.q16 = this.value;
+        });
+        
+        document.getElementById('q18').addEventListener('input', function() {
+            responses.q18 = this.value;
+        });
+        
+        document.getElementById('q21').addEventListener('input', function() {
+            responses.q21 = this.value;
+        });
+
+        // Initialize
+        updateProgress();
+    </script>
+</body>
+</html>
